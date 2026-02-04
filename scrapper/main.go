@@ -1,23 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/go-chi/chi"
 )
 
 func main() {
-	c := colly.NewCollector(
-		colly.AllowedDomains("en.wikipedia.org"),
-	)
+	r := chi.NewRouter()
 
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting: ", r.URL.String())
+	r.Post("/scrape", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Got the msg"))
 	})
 
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Printf("Failed to scrape %s due to %v\n", r.Request.URL.String(), err)
-	})
-
-	c.Visit("https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Evolution_of_HTTP")
+	log.Fatal(http.ListenAndServe(":8081", r))
 }

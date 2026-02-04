@@ -35,4 +35,13 @@ func (p *Proxies) HandleScrapeProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Failed to read response from scrape service", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(resp.StatusCode)
+	w.Write(respBody)
 }
