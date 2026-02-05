@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 	"net/http"
 
@@ -16,7 +17,18 @@ func main() {
 	r.Use(middleware.RequestID)
 
 	r.Post("/scrape", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Got the msg"))
+		url, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		urlStr := string(url)
+
+		if ValidateURL(urlStr) == false {
+			http.Error(w, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+		w.Write([]byte("Got the message " + urlStr))
 	})
 
 	log.Fatal(http.ListenAndServe(":8081", r))

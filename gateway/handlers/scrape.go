@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -22,26 +21,32 @@ func NewProxies() *Proxies {
 }
 
 func (p *Proxies) HandleScrapeProxy(w http.ResponseWriter, r *http.Request) {
-	body, err := io.ReadAll(r.Body)
+	url, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
 
-	resp, err := http.Post("http://localhost:8081/scrape", "text/plain", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", p.scrapeURL, bytes.NewBufferString(string(url)))
 	if err != nil {
-		http.Error(w, "Failed to contact scrape service", http.StatusInternalServerError)
-		log.Print("Check the scrapper service, it may be down")
+		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("Content-Type", "text/plain")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		http.Error(w, "Failed to reach scrapper service", http.StatusBadGateway)
 		return
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "Failed to read response from scrape service", http.StatusInternalServerError)
+		http.Error(w, "Failed to read response from scrapper service", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(resp.StatusCode)
-	w.Write(respBody)
+	w.Write(body)
 }
