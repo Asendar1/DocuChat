@@ -6,6 +6,6 @@ document.getElementById("scrape-form").addEventListener("submit", async (e) => {
 		headers: {"content-type": "text/plain"},
 		body: url
 	})
-	const data = res.text();
+	const data = await res.text();
 	console.log(data);
 })

@@ -20,6 +20,10 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/scrape", http.StatusMovedPermanently)
+	})
+
 	r.Post("/scrape", func(w http.ResponseWriter, r *http.Request) {
 		url, err := io.ReadAll(r.Body)
 		if err != nil {
