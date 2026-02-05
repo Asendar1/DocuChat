@@ -28,7 +28,15 @@ func main() {
 			http.Error(w, "Invalid URL", http.StatusBadRequest)
 			return
 		}
-		w.Write([]byte("Got the message " + urlStr))
+
+		// after validation, proceed with scraping
+		// TODO: add a feature where the user can add multiple URls
+
+		if Scrape(urlStr) == false {
+			http.Error(w, "Failed to scrape the URL", http.StatusInternalServerError)
+			return
+		}
+
 	})
 
 	log.Fatal(http.ListenAndServe(":8081", r))
