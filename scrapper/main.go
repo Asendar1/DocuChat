@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	if handleDataDir() == false {
+		return
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -24,11 +28,6 @@ func main() {
 		}
 		urlStr := string(url)
 
-		if ValidateURL(urlStr) == false {
-			http.Error(w, "Invalid URL", http.StatusBadRequest)
-			return
-		}
-
 		// after validation, proceed with scraping
 		// TODO: add a feature where the user can add multiple URls
 
@@ -36,6 +35,8 @@ func main() {
 			http.Error(w, "Failed to scrape the URL", http.StatusInternalServerError)
 			return
 		}
+
+		w.Write([]byte("Succeeded"))
 
 	})
 

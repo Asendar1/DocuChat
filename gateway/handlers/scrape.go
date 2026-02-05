@@ -21,7 +21,7 @@ func NewProxies() *Proxies {
 }
 
 func (p *Proxies) HandleScrapeProxy(w http.ResponseWriter, r *http.Request) {
-	url, err := io.ReadAll(r.Body)
+	url, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
