@@ -4,14 +4,31 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>DocuChat</title>
+		<link rel="stylesheet" href="/static/css/modal.css" />
 	</head>
 
 	<body>
 		<h1>Welcome to DocuChat</h1>
-		<p>There is nothing now right here</p>
-		<form id="scrape-form" >
-			<input value="url" type="text" placeholder="Give URL">
-		</form>
+		<p>Only the scrapper here to make you company for now</p>
+		<div id="scrapeModal" class="modal">
+			<div class="modal-content">
+				<span class="close-btn" onclick="closeModal()">&times;</span>
+				<h2>Scrape Service</h2>
+				<div class="how-to-text">
+					<p><strong>How to use:</strong></p>
+					<p>
+						Enter the URL of the website you want to scrape. The system will
+						extract and process the content.
+					</p>
+					<p>Hint: The scrapper is optimized for documentation-style pages like Wikipedia.</p>
+				</div>
+				<form id="scrape-form">
+					<textarea class="textarea-box" placeholder="https://example.com&#10;https://another-site.com&#10;https://third-website.org" required></textarea>
+					<button type="submit" class="submit-btn">Scrape</button>
+				</form>
+			</div>
+		</div>
+		<button onclick="openModal()">Open Scraper</button>
 	</body>
 	<script src="/static/js/scrapperAPI.js"></script>
 </html>

@@ -18,6 +18,7 @@ func Scrape(url string) bool {
 	fileHash := sha256.Sum256([]byte(url))
 	fileName := "data/" + hex.EncodeToString(fileHash[:]) + ".txt"
 
+	// TODO: add caching for filenames to avoid I/O overhead
 	if _, err := os.Stat(fileName); err == nil {
 		os.Remove(fileName)
 	}
@@ -28,6 +29,7 @@ func Scrape(url string) bool {
 	}
 	defer file.Close()
 
+	// TODO add struct and channels to indicate progress and errors (http response writer closes after first write)
 	c := colly.NewCollector()
 
 	c.OnRequest(func(r *colly.Request) {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -36,17 +37,22 @@ func main() {
 			return
 		}
 		urlStr := string(url)
+		urlSlice := strings.Split(urlStr, ",")
 
-		// after validation, proceed with scraping
-		// TODO: add a feature where the user can add multiple URls
+		numsOfComma := strings.Count(urlStr, ",")
 
-		if Scrape(urlStr) == false {
-			http.Error(w, "Failed to scrape the URL", http.StatusInternalServerError)
-			return
+		for i := 0; i <= numsOfComma; i++ {
+			url := urlSlice[i]
+			go func(url string) {
+				// scrapper handle validation to avoid multiple HTTP requests
+				if Scrape(url) == false {
+					http.Error(w, "Failed to scrape the URL", http.StatusInternalServerError)
+					return
+				}
+			}(url)
 		}
 
-		w.Write([]byte("Succeeded"))
-
+		w.Write([]byte("Processing scrape request for " + urlStr))
 	})
 
 	srv := &http.Server{
