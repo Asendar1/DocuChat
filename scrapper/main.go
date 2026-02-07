@@ -45,6 +45,8 @@ func main() {
 			url := urlSlice[i]
 			go func(url string) {
 				// scrapper handle validation to avoid multiple HTTP requests
+				// TODO check for: 1- same url (just skip) 2- same domain (add time delay to be a nice little bot)
+				// oh btw if it "network fails" its the user fault 100%, but iam gonna log it cuz i be nice like that.
 				if Scrape(url) == false {
 					http.Error(w, "Failed to scrape the URL", http.StatusInternalServerError)
 					return
