@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,5 +49,30 @@ func main() {
 
 	})
 
-	log.Fatal(http.ListenAndServe(":8081", r))
+	srv := &http.Server{
+		Addr:    ":8081",
+		Handler: r,
+	}
+
+	go func() {
+		log.Printf("Scraper server is running on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	log.Println("Shutting down scrapper server...")
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Failed to shutdown scrapper server: %v", err)
+	}
+
+	log.Println("Scrapper server exiting")
+
 }
