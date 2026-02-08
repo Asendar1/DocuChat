@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package test;
+
+option go_package = "github.com/Asendar1/DocuChat/scrapper/pb";
+
+service	Test {
+	rpc	Test(TestReq) returns (TestRes);
+}
+
+message TestReq {
+	string tm = 1;
+}
+
+message TestRes {
+	string tm = 1;
+}

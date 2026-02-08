@@ -1,3 +1,16 @@
 data/
 *.o
 tokenizer
+
+# protobuf related
+*/pb/
+*/generated/
+*/gen/
+*/src/pb/*
+*.pb.go
+*.pb.h
+*.pb.cc
+
+# OBJ files
+*.obj
+*.o

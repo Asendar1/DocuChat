@@ -1,4 +1,4 @@
-module github.com/Asendar1/NexusProto/DocuChat/gateway
+module github.com/Asendar1/DocuChat/gateway
 
 go 1.25.5
 

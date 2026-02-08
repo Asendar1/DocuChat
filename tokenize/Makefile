@@ -1,2 +1,34 @@
-all:
-	g++ -Wall -Werror -Wextra main.cpp -o tokenizer
+CXX = g++
+CXXFLAGS = -Wall -Werror -Wextra -std=c++17 -I.
+LDFLAGS = -lgrpc++ -lgrpc -lgpr -lprotobuf -lpthread \
+		  -labsl_synchronization -labsl_strings -labsl_base
+
+PROTO_SRCS = src/pb/test.pb.cc src/pb/test.grpc.pb.cc
+PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
+
+NAME = test
+OBJ_DIR = obj
+
+all: $(OBJ_DIR) $(NAME)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+$(NAME): $(PROTO_OBJS) $(OBJ_DIR)/main.o
+	$(CXX) $(PROTO_OBJS) $(OBJ_DIR)/main.o $(LDFLAGS) -o $(NAME)
+
+$(OBJ_DIR)/%.o: src/pb/%.cc | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/main.o: main.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c main.cpp -o $@
+
+clean:
+	rm -rf $(OBJ_DIR)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re

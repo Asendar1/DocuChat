@@ -1,3 +1,5 @@
+test = "tokenize/test"
+
 all:
 	hivemind
 
@@ -7,4 +9,8 @@ run-gateway:
 run-scrapper:
 	make -C scrapper
 
-.PHONY: all run-gateway run-scrapper
+run-compile-cpp:
+	make -C tokenize
+	./$(test)
+
+.PHONY: all run-gateway run-scrapper run-compile-cpp

@@ -83,6 +83,12 @@ func Scrape(url string) bool {
 		success = false
 	}
 
+	// Test gRPC connection (remove this in production)
+	tc, _ := NewTestClient("localhost:50051")
+	msg , _:= tc.CallTest("sup fella")
+	log.Printf("Test gRPC response: %s", msg)
+	tc.Close()
+
 	return success
 }
 
