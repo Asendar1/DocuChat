@@ -4,8 +4,14 @@ package test;
 
 option go_package = "github.com/Asendar1/DocuChat/scrapper/pb";
 
+// Test service to experimante and learn in the mean while
 service	Test {
+	// generic test method to test the connection and the setup of the proto files
 	rpc	Test(TestReq) returns (TestRes);
+
+	// method to test the connection between scrapper and tokenizer, it will take the hased file name
+	// Return false if 1-it was taken before 2- server is down for somereason
+	rpc	TestTokenizeCall(HashedFile) returns (Taken);
 }
 
 message TestReq {
@@ -14,4 +20,12 @@ message TestReq {
 
 message TestRes {
 	string tm = 1;
+}
+
+message HashedFile {
+	string hash = 1;
+}
+
+message Taken {
+	bool taken = 1;
 }

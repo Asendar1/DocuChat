@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Asendar1/DocuChat/scrapper/pb"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -85,8 +87,11 @@ func Scrape(url string) bool {
 
 	// Test gRPC connection (remove this in production)
 	tc, _ := NewTestClient("localhost:50051")
-	msg , _:= tc.CallTest("sup fella")
+	msg, _ := tc.CallTest("sup fella")
+	test_token := &pb.HashedFile{Hash: string(fileHash[:])}
 	log.Printf("Test gRPC response: %s", msg)
+	resp, _ := tc.client.TestTokenizeCall(context.Background(), test_token)
+	log.Printf("Test gRPC tokenize response: %v", resp.GetTaken())
 	tc.Close()
 
 	return success

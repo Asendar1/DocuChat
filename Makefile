@@ -9,6 +9,9 @@ run-gateway:
 run-scrapper:
 	make -C scrapper
 
+run-cpp:
+	./$(test)
+
 run-compile-cpp:
 	make -C tokenize
 	./$(test)

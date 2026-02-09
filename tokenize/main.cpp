@@ -11,6 +11,8 @@ using grpc::Status;
 using test::Test;
 using test::TestReq;
 using test::TestRes;
+using test::HashedFile;
+using test::Taken;
 
 class TestService final : public Test::Service {
 	Status Test(ServerContext* ctx, const TestReq* req, TestRes* res) override {
@@ -18,6 +20,16 @@ class TestService final : public Test::Service {
 		std::cout << "Received message: " << msg << std::endl;
 		res->set_tm("Hello from server!");
 		(void)ctx; // silence unused parameter warning
+		return Status::OK;
+	};
+
+	Status TestTokenizeCall(ServerContext* ctx, const HashedFile *req, Taken *res) override {
+		std::string hash = req->hash();
+		std::cout << "Received hash: " << hash << std::endl;
+		// for now just always return true
+		// TODO the client prints false for somereason, check why
+		res->set_taken(true);
+		(void)ctx;
 		return Status::OK;
 	}
 };
