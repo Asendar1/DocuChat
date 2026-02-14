@@ -83,6 +83,11 @@ func Scrape(url string) bool {
 		success = false
 	}
 
+	cl , _ := NewDocClient("localhost:50051")
+	defer cl.Close()
+	res, _ := cl.CallTest("HI")
+	log.Printf("Response from gRPC server: %s", res)
+
 	return success
 }
 

@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include <grpcpp/grpcpp.h>
-#include "src/pb/test.grpc.pb.h"
+#include "src/pb/docuchat.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;

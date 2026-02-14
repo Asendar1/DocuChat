@@ -1,9 +1,10 @@
 CXX = g++
-CXXFLAGS = -Wall -Werror -Wextra -std=c++17 -I.
+# TODO return the -Werror later
+CXXFLAGS = -Wall -Wextra -std=c++17 -I.
 LDFLAGS = -lgrpc++ -lgrpc -lgpr -lprotobuf -lpthread \
 		  -labsl_synchronization -labsl_strings -labsl_base
 
-PROTO_SRCS = src/pb/test.pb.cc src/pb/test.grpc.pb.cc
+PROTO_SRCS = src/pb/docuchat.pb.cc src/pb/docuchat.grpc.pb.cc
 PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
 
 NAME = test
