@@ -87,12 +87,15 @@ func Scrape(url string) bool {
 
 	// Test gRPC connection (remove this in production)
 	tc, _ := NewTestClient("localhost:50051")
+	defer tc.Close()
 	msg, _ := tc.CallTest("sup fella")
-	test_token := &pb.HashedFile{Hash: string(fileHash[:])}
+	test_token := &pb.HashedFile{Hash: hex.EncodeToString(fileHash[:])}
 	log.Printf("Test gRPC response: %s", msg)
-	resp, _ := tc.client.TestTokenizeCall(context.Background(), test_token)
+	resp, err := tc.client.TestTokenizeCall(context.Background(), test_token)
+	if err != nil {
+		log.Printf("Failed to call TestTokenizeCall: %v", err)
+	}
 	log.Printf("Test gRPC tokenize response: %v", resp.GetTaken())
-	tc.Close()
 
 	return success
 }
