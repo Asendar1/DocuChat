@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"log"
@@ -9,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Asendar1/DocuChat/scrapper/pb"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -84,18 +82,6 @@ func Scrape(url string) bool {
 		log.Printf("Failed to visit URL: %v", err)
 		success = false
 	}
-
-	// Test gRPC connection (remove this in production)
-	tc, _ := NewTestClient("localhost:50051")
-	defer tc.Close()
-	msg, _ := tc.CallTest("sup fella")
-	test_token := &pb.HashedFile{Hash: hex.EncodeToString(fileHash[:])}
-	log.Printf("Test gRPC response: %s", msg)
-	resp, err := tc.client.TestTokenizeCall(context.Background(), test_token)
-	if err != nil {
-		log.Printf("Failed to call TestTokenizeCall: %v", err)
-	}
-	log.Printf("Test gRPC tokenize response: %v", resp.GetTaken())
 
 	return success
 }
