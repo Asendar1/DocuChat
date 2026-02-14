@@ -10,6 +10,7 @@ service	DocumentProcessor {
 	rpc	Test(TestReq) returns (TestRes);
 
 	// method to process a file, it will return the number of tokens and if the file was already processed before
+	// success is true even if the file was already processed, so check for both flags
 	rpc ProcessFile(FileRequest) returns (ProcessResponse);
 }
 

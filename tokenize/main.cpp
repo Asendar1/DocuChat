@@ -7,40 +7,64 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
-using grpc::Status;
-using test::Test;
-using test::TestReq;
-using test::TestRes;
-using test::HashedFile;
-using test::Taken;
+using docuchat::DocumentProcessor;
+using docuchat::VectorSearch;
+using docuchat::FileRequest;
+using docuchat::HashedFile;
+using docuchat::SearchRequest;
+using docuchat::SearchResponse;
+using docuchat::ProcessResponse;
+using docuchat::TestReq;
+using docuchat::TestRes;
 
-class TestService final : public Test::Service {
-	Status Test(ServerContext* ctx, const TestReq* req, TestRes* res) override {
-		std::string msg = req->tm();
-		std::cout << "Received message: " << msg << std::endl;
-		res->set_tm("Hello from server!");
-		(void)ctx; // silence unused parameter warning
-		return Status::OK;
-	};
+class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
+	grpc::Status Test(ServerContext* ctx, const TestReq* req, TestRes* res) override {
+		std::cout << "Received test request with message: " << req->tm() << std::endl;
+		res->set_tm("Hello from the server!");
+		return grpc::Status::OK;
+	}
 
-	Status TestTokenizeCall(ServerContext* ctx, const HashedFile *req, Taken *res) override {
-		std::string hash = req->hash();
-		std::cout << "Received hash: " << hash << std::endl;
-		// for now just always return true
-		// TODO the client prints false for somereason, check why
-		res->set_taken(true);
-		(void)ctx;
-		return Status::OK;
+	grpc::Status ProcessFile(ServerContext* ctx, const FileRequest* req, ProcessResponse* res) override {
+		std::cout << "Received file hash: " << req->hash() << std::endl;
+		// TODO Check if the file were already processed, for now i'll just return no
+		res->set_success(true);
+		res->set_already_exists(true);
+		res->set_message("File was already processed");
+		res->set_tokens(42);
+		return grpc::Status::OK;
 	}
 };
 
+class VectorSearchServiceImpl final : public VectorSearch::Service {
+	grpc::Status Search(ServerContext* ctx, const SearchRequest* req, SearchResponse* res) override {
+		std::cout << "Received search request with query: " << req->query() << std::endl;
+		// TODO : implement search logic, for now i'll just return an empty response
+		return grpc::Status::OK;
+	}
+
+	grpc::Status GetDocument(ServerContext* ctx, const HashedFile* req, docuchat::Document* res) override {
+		std::cout << "Received document request with hash: " << req->hash() << std::endl;
+		// TODO : implement get document logic, for now i'll just return an empty response
+		return grpc::Status::OK;
+	}
+
+	grpc::Status DeleteDocument(ServerContext* ctx, const HashedFile* req, docuchat::DeleteResponse* res) override {
+		std::cout << "Received delete request with hash: " << req->hash() << std::endl;
+		// TODO : implement delete document logic, for now i'll just return an empty response
+		return grpc::Status::OK;
+	}
+};
+
+
 void run_server() {
 	std::string srv_addr("0.0.0.0:50051");
-	TestService service;
+	DocumentProcessorServiceImpl doc_service;
+	VectorSearchServiceImpl search_service;
 
 	ServerBuilder builder;
 	builder.AddListeningPort(srv_addr, grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
+	builder.RegisterService(&doc_service);
+	builder.RegisterService(&search_service);
 
 	std::unique_ptr<Server> server(builder.BuildAndStart());
 	std::cout << "Server listening on " << srv_addr << std::endl;
