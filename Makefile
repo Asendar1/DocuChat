@@ -1,4 +1,4 @@
-test = "tokenize/test"
+tokenizer = "tokenize/tokenize"
 
 all:
 	hivemind
@@ -10,10 +10,10 @@ run-scrapper:
 	make -C scrapper
 
 run-cpp:
-	./$(test)
+	./$(tokenizer)
 
 run-compile-cpp:
 	make -C tokenize
-	./$(test)
+	./$(tokenizer)
 
 .PHONY: all run-gateway run-scrapper run-compile-cpp

@@ -7,7 +7,7 @@ LDFLAGS = -lgrpc++ -lgrpc -lgpr -lprotobuf -lpthread \
 PROTO_SRCS = src/pb/docuchat.pb.cc src/pb/docuchat.grpc.pb.cc
 PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
 
-NAME = test
+NAME = tokenize
 OBJ_DIR = obj
 
 all: $(OBJ_DIR) $(NAME)

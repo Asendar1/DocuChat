@@ -1,6 +1,7 @@
 data/
 *.o
 tokenizer
+tokenize
 test
 
 # protobuf related

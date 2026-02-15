@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"log"
@@ -8,26 +9,15 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Asendar1/DocuChat/scrapper/pb"
 	"github.com/gocolly/colly/v2"
 )
 
-// Scrape takes a URL, scrapes the content (optimized for documentation-style pages like Wikipedia), and saves the cleaned text to a file named by the URL's hash.
-// IT DOES make a file under /data folder (so don't remove it mid-run).
-// If the same file already exists, it will be overwritten with the new content.
+// Scrape takes a URL, scrapes the content (optimized for documentation-style pages like Wikipedia)
+// Sends it to the tokenizer microservice for further processing, and returns true if successful.
 func Scrape(url string) bool {
-	fileHash := sha256.Sum256([]byte(url))
-	fileName := "data/" + hex.EncodeToString(fileHash[:]) + ".txt"
-
-	// TODO: add caching for filenames to avoid I/O overhead
-	if _, err := os.Stat(fileName); err == nil {
-		os.Remove(fileName)
-	}
-	file, err := os.Create(fileName)
-	if err != nil {
-		log.Printf("Failed to create file: %v", err)
-		return false
-	}
-	defer file.Close()
+	urlHash := sha256.Sum256([]byte(url))
+	str := strings.Builder{}
 
 	// TODO add struct and channels to indicate progress and errors (http response writer closes after first write)
 	c := colly.NewCollector()
@@ -50,7 +40,7 @@ func Scrape(url string) bool {
 			text := strings.TrimSpace(el.Text)
 			// Skip navigation/metadata headers
 			if text != "" && !isMetadataHeader(text) {
-				file.WriteString("## " + text + "\n\n")
+				str.WriteString("## " + text + "\n\n")
 			}
 		})
 
@@ -59,7 +49,7 @@ func Scrape(url string) bool {
 			text := cleanText(el.Text)
 			// Filter short or meaningless content
 			if text != "" && len(text) > 30 && !isBoilerplate(text) {
-				file.WriteString(text + "\n\n")
+				str.WriteString(text + "\n\n")
 			}
 		})
 
@@ -67,7 +57,7 @@ func Scrape(url string) bool {
 		h.ForEach("ul > li, ol > li", func(_ int, el *colly.HTMLElement) {
 			text := cleanText(el.Text)
 			if text != "" && len(text) > 15 {
-				file.WriteString("- " + text + "\n")
+				str.WriteString("- " + text + "\n")
 			}
 		})
 	})
@@ -77,18 +67,43 @@ func Scrape(url string) bool {
 		success = false
 	})
 
-	err = c.Visit(url)
+	err := c.Visit(url)
 	if err != nil {
 		log.Printf("Failed to visit URL: %v", err)
 		success = false
 	}
 
-	cl , _ := NewDocClient("localhost:50051")
-	defer cl.Close()
-	res, _ := cl.CallTest("HI")
-	log.Printf("Response from gRPC server: %s", res)
+	tc, err := NewDocClient("localhost:50051")
+	if err != nil {
+		log.Printf("Failed to create doc client: %v", err)
+		return false
+	}
+	defer tc.Close()
+
+	fr := &pb.FileRequest{
+		Hash: hex.EncodeToString(urlHash[:]),
+		Content: str.String(),
+	}
+
+	pr, err := tc.client.ProcessFile(context.Background(), fr)
+	if err != nil {
+		log.Printf("Failed to process file: %v", err)
+		return false
+	}
+
+	if !PrintResults(pr) {
+		return false
+	}
 
 	return success
+}
+
+func PrintResults(pr *pb.ProcessResponse) bool {
+	log.Printf("Success: %v\n", pr.GetSuccess())
+	log.Printf("Already Exists: %v\n", pr.GetAlreadyExists())
+	log.Printf("Tokens: %v\n", pr.GetTokens())
+	log.Printf("Message: %v\n", pr.GetMessage())
+	return pr.GetSuccess()
 }
 
 func cleanText(text string) string {

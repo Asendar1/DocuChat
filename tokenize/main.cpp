@@ -26,6 +26,8 @@ class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
 
 	grpc::Status ProcessFile(ServerContext* ctx, const FileRequest* req, ProcessResponse* res) override {
 		std::cout << "Received file hash: " << req->hash() << std::endl;
+		std::string content(req->content().substr(0, 100));
+		std::cout << "Received file content (first 100 chars): " << content << std::endl;
 		// TODO Check if the file were already processed, for now i'll just return no
 		res->set_success(true);
 		res->set_already_exists(true);
