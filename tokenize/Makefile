@@ -7,7 +7,10 @@ LDFLAGS = -lgrpc++ -lgrpc -lgpr -lprotobuf -lpthread \
 PROTO_SRCS = src/pb/docuchat.pb.cc src/pb/docuchat.grpc.pb.cc
 PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
 
-NAME = tokenize
+SRCS = main.cpp tokenize.cpp
+OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
+
+NAME = tokenizer
 OBJ_DIR = obj
 
 all: $(OBJ_DIR) $(NAME)
@@ -15,14 +18,14 @@ all: $(OBJ_DIR) $(NAME)
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
-$(NAME): $(PROTO_OBJS) $(OBJ_DIR)/main.o
-	$(CXX) $(PROTO_OBJS) $(OBJ_DIR)/main.o $(LDFLAGS) -o $(NAME)
+$(NAME): $(PROTO_OBJS) $(OBJS)
+	$(CXX) $(PROTO_OBJS) $(OBJS) $(LDFLAGS) -o $(NAME) -I.
 
 $(OBJ_DIR)/%.o: src/pb/%.cc | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -I.
 
-$(OBJ_DIR)/main.o: main.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c main.cpp -o $@
+$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)

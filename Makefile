@@ -1,4 +1,4 @@
-tokenizer = "tokenize/tokenize"
+tokenizer = "tokenize/tokenizer"
 
 all:
 	hivemind

@@ -2,7 +2,9 @@
 #include <string>
 #include <memory>
 #include <grpcpp/grpcpp.h>
+
 #include "src/pb/docuchat.grpc.pb.h"
+#include "tokenize.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -29,6 +31,9 @@ class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
 		std::string content(req->content().substr(0, 100));
 		std::cout << "Received file content (first 100 chars): " << content << std::endl;
 		// TODO Check if the file were already processed, for now i'll just return no
+		if (!tokenize_and_embedd(content)) {
+			return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to process file");
+		}
 		res->set_success(true);
 		res->set_already_exists(true);
 		res->set_message("File was already processed");
