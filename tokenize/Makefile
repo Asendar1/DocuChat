@@ -7,6 +7,9 @@ LDFLAGS = -lgrpc++ -lgrpc -lgpr -lprotobuf -lpthread \
 PROTO_SRCS = src/pb/docuchat.pb.cc src/pb/docuchat.grpc.pb.cc
 PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
 
+SENTENCE_PIECE_LDFLAGS = -lsentencepiece
+LDFLAGS += $(SENTENCE_PIECE_LDFLAGS)
+
 SRCS = main.cpp tokenize.cpp
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 

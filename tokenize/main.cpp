@@ -19,6 +19,8 @@ using docuchat::ProcessResponse;
 using docuchat::TestReq;
 using docuchat::TestRes;
 
+t_env env;
+
 class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
 	grpc::Status Test(ServerContext* ctx, const TestReq* req, TestRes* res) override {
 		std::cout << "Received test request with message: " << req->tm() << std::endl;
@@ -31,7 +33,7 @@ class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
 		std::string content(req->content().substr(0, 100));
 		std::cout << "Received file content (first 100 chars): " << content << std::endl;
 		// TODO Check if the file were already processed, for now i'll just return no
-		if (!tokenize_and_embedd(content)) {
+		if (!tokenize_and_embedd(content, env)) {
 			return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to process file");
 		}
 		res->set_success(true);
@@ -81,6 +83,8 @@ void run_server() {
 }
 
 int main() {
+	env.sentence_model_path = std::getenv("SENTENCE_MODEL_PATH") ? std::getenv("SENTENCE_MODEL_PATH") : "model/spiece.model";
+
 	run_server();
 	return 0;
 }

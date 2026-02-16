@@ -1,3 +1,5 @@
+.env
+
 data/
 *.o
 tokenizer
@@ -15,3 +17,7 @@ test
 # OBJ files
 *.obj
 *.o
+
+# Models and ONNX
+*.onnx
+*.model
