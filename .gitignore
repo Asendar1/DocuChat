@@ -1,9 +1,10 @@
 .env
-
 data/
 *.o
 tokenizer
 test
+
+.vscode/
 
 # protobuf related
 */pb/

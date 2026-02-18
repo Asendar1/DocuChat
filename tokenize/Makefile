@@ -10,6 +10,11 @@ PROTO_OBJS = $(addprefix $(OBJ_DIR)/, $(notdir $(PROTO_SRCS:.cc=.o)))
 SENTENCE_PIECE_LDFLAGS = -lsentencepiece
 LDFLAGS += $(SENTENCE_PIECE_LDFLAGS)
 
+ONNXRUNTIME_LDFLAGS = -L/usr/local/onnxruntime/lib -lonnxruntime
+LDFLAGS += $(ONNXRUNTIME_LDFLAGS)
+
+ONNXRUNTIME_INCLUDE = -I/usr/local/onnxruntime/include
+
 SRCS = main.cpp tokenize.cpp
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
@@ -22,13 +27,13 @@ $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
 $(NAME): $(PROTO_OBJS) $(OBJS)
-	$(CXX) $(PROTO_OBJS) $(OBJS) $(LDFLAGS) -o $(NAME) -I.
+	$(CXX) $(PROTO_OBJS) $(OBJS) $(LDFLAGS) -o $(NAME) -I. $(ONNXRUNTIME_INCLUDE)
 
 $(OBJ_DIR)/%.o: src/pb/%.cc | $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -I.
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(ONNXRUNTIME_INCLUDE)
 
 clean:
 	rm -rf $(OBJ_DIR)

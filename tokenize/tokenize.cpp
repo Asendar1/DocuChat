@@ -28,14 +28,6 @@ class Tokenizer {
 				std::cerr << "Tokenization failed for text: " << text << ": " << status.ToString() << std::endl;
 				return {};
 			}
-			// test
-			std::vector<std::string>::iterator it = tokens.begin();
-			int count = 0;
-			while (it != tokens.end() && count < 100) {
-				std::cout << *it << std::endl;
-				++it;
-				++count;
-			}
 			return tokens;
 		}
 
