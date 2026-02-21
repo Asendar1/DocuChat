@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 #include <grpcpp/grpcpp.h>
+#include <csignal>
+#include <thread>
 
 #include "src/pb/docuchat.grpc.pb.h"
 #include "tokenize.hpp"
@@ -20,6 +22,15 @@ using docuchat::TestReq;
 using docuchat::TestRes;
 
 t_env env;
+
+// global server isntance for signal handling
+std::unique_ptr<Server> g_server;
+std::atomic<bool> g_shutdown_requested(false);
+
+void signal_handler(int signal)
+{
+	g_shutdown_requested.store(true);
+}
 
 class DocumentProcessorServiceImpl final : public DocumentProcessor::Service {
 	grpc::Status Test(ServerContext* ctx, const TestReq* req, TestRes* res) override {
@@ -64,7 +75,6 @@ class VectorSearchServiceImpl final : public VectorSearch::Service {
 	}
 };
 
-
 void run_server() {
 	std::string srv_addr("0.0.0.0:50051");
 	DocumentProcessorServiceImpl doc_service;
@@ -75,11 +85,28 @@ void run_server() {
 	builder.RegisterService(&doc_service);
 	builder.RegisterService(&search_service);
 
-	std::unique_ptr<Server> server(builder.BuildAndStart());
+	g_server = builder.BuildAndStart();
 	std::cout << "Server listening on " << srv_addr << std::endl;
 
 	//TODO : add signal handling for graceful shutdown (its thread time nooooooo)
-	server->Wait();
+	std::signal(SIGINT, signal_handler);
+	std::signal(SIGTERM, signal_handler);
+
+	std::thread monitor_thread([&]() {
+		while(!g_shutdown_requested.load())
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+		if (g_server)
+		{
+			std::cout << "Shutdown signal received, shutting down server..." << std::endl;
+			g_server->Shutdown();
+		}
+	});
+
+	g_server->Wait();
+	monitor_thread.join();
+	std::cout << "Server shutdown complete" << std::endl;
 }
 
 int main() {
